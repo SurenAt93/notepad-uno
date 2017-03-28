@@ -62,6 +62,10 @@
         color: #eee;
       }
 
+      .black {
+        color: black !important;
+      }
+
       .position {
         color: #FFD700;
         font-weight: bold;
@@ -86,10 +90,10 @@
               <div prefix class="position">[[user.position]]</div>
               <div suffix class="total">[[user.total]]</div>
             </paper-input>
-            <div class="all-points" on-scroll="scrollPoints">
+            <div class="all-points">
               <iron-list items="[[user.allPoints]]" as="point">
                 <template>
-                  <div class="point">
+                  <div>
                     [[point]]
                   </div>
                 </template>
@@ -131,19 +135,16 @@
       },
 
       initializeDefaultUser: function() {
-        console.log('test')
-        // this.users = [{
-        //   name: '',
-        //   total: 0,
-        //   allPoints: [],
-        //   position:0
-        // }];
         this.set('users', [{
           name: '',
           total: 0,
           allPoints: [],
           position:0
         }]);
+      },
+
+      ready: function() {
+        this.scrollSection = this.$$('.uno-content');
       },
 
       openConfirm: function() {
@@ -157,6 +158,10 @@
           allPoints: [],
           position: 0
         });
+
+        setTimeout(() => {
+          this.scrollTo(this.scrollSection, this.scrollSection.scrollWidth, 500)
+        }, 0);
       },
 
       reset: function() {
@@ -210,8 +215,25 @@
         });
       },
 
-      scrollPoints: function() {
-        console.log('test')
+      scrollPoints: function(e) {
+        let elem = e.target;
+
+        [].map.call(elem.querySelectorAll('div.point'), el => {
+          el.classList.add('black');
+        });
+      },
+
+      scrollTo: function(element, to, duration) {
+        if (duration <= 0) return;
+        var difference = to - element.scrollLeft;
+        var perTick = difference / duration * 10;
+
+
+        setTimeout(() => {
+          element.scrollLeft = element.scrollLeft + perTick;
+          if (element.scrollLeft === to) return;
+          this.scrollTo(element, to, duration - 10);
+        }, 10);
       }
 
     });
