@@ -1,0 +1,219 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animation.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+
+<dom-module id="uno-table">
+  <template>
+    <style>
+      :host {
+        display: block;
+        overflow-y: hidden;
+      }
+
+      .user-info {
+        display: inline-block;
+        height: 80px !important;
+        width: 20%;
+      }
+
+      paper-icon-button[icon="check"] {
+        color: green;
+      }
+
+      .uno-content {
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 96vh;
+        white-space: nowrap;
+      }
+
+      .uno-buttons {
+        display: inline-table;
+        top: 0;
+        vertical-align: top;
+      }
+
+      paper-icon-button {
+        height: 80px !important;
+      }
+
+      .users {
+        height: 80px !important;
+      }
+
+      .user-point {
+        display: block;
+      }
+
+      .all-points {
+        height: 150%;
+        overflow: auto;
+      }
+
+      .all-points .point {
+        color: #eee;
+      }
+
+      .position {
+        color: #FFD700;
+        font-weight: bold;
+      }
+
+      .total {
+        color: #2196F3;
+        font-weight: bold;
+      }
+    </style>
+    <div class="uno-content">
+      <iron-localstorage name="uno-app-storage"
+        value="{{users}}"
+        on-iron-localstorage-load-empty="initializeDefaultUser"
+      ></iron-localstorage>
+      <div class="users">
+        <template is="dom-repeat" items="{{users}}" as="user">
+          <div class="user-info">
+            <paper-input always-float-label label="Write player name" value="{{user.name}}">
+            </paper-input>
+            <paper-input class="disabled" disabled label=" :: Total point :: ">
+              <div prefix class="position">[[user.position]]</div>
+              <div suffix class="total">[[user.total]]</div>
+            </paper-input>
+            <div class="all-points" on-scroll="scrollPoints">
+              <iron-list items="[[user.allPoints]]" as="point">
+                <template>
+                  <div class="point">
+                    [[point]]
+                  </div>
+                </template>
+              </iron-list>
+            </div>
+            <div class="user-point">
+              <paper-input name="[[user.name]]" on-keyup="addPoint" label="Write point" type="number">
+              </paper-input>
+            </div>
+          </div>
+        </template>
+        <div class="uno-buttons">
+          <paper-icon-button icon="add" on-tap="addUser"></paper-icon-button>
+          <paper-icon-button icon="refresh" on-tap="openConfirm"></paper-icon-button>
+        </div>
+      </div>
+      <paper-toast id="toast3" class="fit-bottom" text="Please write user name"></paper-toast>
+      <paper-dialog id="confirmed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+        <h2>Confirm</h2>
+        <p>Are you sure?</p>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm autofocus on-tap="reset">Accept</paper-button>
+        </div>
+      </paper-dialog>
+    </div>
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'uno-table',
+
+      properties: {
+        users: {
+          type: Array
+        }
+      },
+
+      initializeDefaultUser: function() {
+        console.log('test')
+        // this.users = [{
+        //   name: '',
+        //   total: 0,
+        //   allPoints: [],
+        //   position:0
+        // }];
+        this.set('users', [{
+          name: '',
+          total: 0,
+          allPoints: [],
+          position:0
+        }]);
+      },
+
+      openConfirm: function() {
+        confirmed.open();
+      },
+
+      addUser: function() {
+        this.push('users', {
+          name: '',
+          total: 0,
+          allPoints: [],
+          position: 0
+        });
+      },
+
+      reset: function() {
+        this.initializeDefaultUser();
+      },
+
+      addPoint: function(e) {
+        if (e.keyCode == 13 || e.keyCode == 229) {
+
+          let elem = e.target;
+
+          if (elem.name) {
+            let user = (this.users.filter(item => {
+              if (item.name == elem.name) {
+                return item;
+              }
+            }))[0];
+
+            let index = this.users.indexOf(user);
+
+            let lastValue = +this.get(`users.${index}.total`);
+
+            let currentValue = +elem.value;
+
+            this.set(`users.${index}.total`, lastValue + currentValue);
+
+            this.push(`users.${index}.allPoints`, currentValue);
+
+            elem.value = null;
+
+            this.reCalcuatePositions();
+          } else {
+            toast3.open();
+          }
+        }
+      },
+
+      reCalcuatePositions: function() {
+        this.users.sort((a, b) => {
+          if (a.total < b.total) {
+            return -1;
+          }
+          if (a.total > b.total) {
+            return 1;
+          }
+          return 0;
+        });
+
+        this.users.forEach((user, index) => {
+          this.set(`users.${index}.position`, index + 1);
+        });
+      },
+
+      scrollPoints: function() {
+        console.log('test')
+      }
+
+    });
+  </script>
+</dom-module>

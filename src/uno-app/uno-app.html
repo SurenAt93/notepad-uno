@@ -1,0 +1,28 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../uno-table/uno-table.html">
+
+<dom-module id="uno-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <uno-table></uno-table>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'uno-app',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'notepad for UNO',
+        },
+      },
+
+    });
+  </script>
+</dom-module>

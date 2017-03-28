@@ -1,0 +1,7 @@
+{
+  "name": "UNO",
+  "short_name": "UNO",
+  "description": "notepad for UNO game",
+  "start_url": "/",
+  "display": "standalone"
+}
